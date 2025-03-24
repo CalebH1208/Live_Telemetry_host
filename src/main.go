@@ -3,6 +3,7 @@ package main
 import (
 	"car"
 	"log"
+	"net"
 	"net/http"
 	"serial"
 	"strconv"
@@ -42,6 +43,7 @@ func main() {
 	if err := http.ListenAndServe(":8080", nil); err != nil {
 		log.Fatalf("Web server error: %v", err)
 	}
+	printServerAddresses(8080)
 }
 
 /*
@@ -114,4 +116,22 @@ func getCarsSlice() []*car.Car {
 		carsSlice = append(carsSlice, c)
 	}
 	return carsSlice
+}
+
+func printServerAddresses(port int) {
+	addrs, err := net.InterfaceAddrs()
+	if err != nil {
+		log.Printf("Error getting IP addresses: %v", err)
+		return
+	}
+	log.Println("Server may be reachable at:")
+	for _, addr := range addrs {
+		// Check if the address is an IP address and not a loopback.
+		if ipnet, ok := addr.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
+			// Only consider IPv4 addresses.
+			if ip4 := ipnet.IP.To4(); ip4 != nil {
+				log.Printf("http://%s:%d/", ip4.String(), port)
+			}
+		}
+	}
 }
