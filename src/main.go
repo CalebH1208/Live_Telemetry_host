@@ -3,11 +3,13 @@ package main
 import (
 	"car"
 	"log"
+	"net/http"
 	"serial"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
+	"ws"
 )
 
 var (
@@ -28,12 +30,18 @@ func main() {
 
 	go serial.Read_serial_message(port, serialChan)
 	go process_Serial_Data(serialChan)
+	go Update_active_flags(carsMap, time.Second*5)
 
-	for {
-		printCarsMap()
-		time.Sleep(time.Second * 5)
+	wsManager := ws.NewManager()
+	go wsManager.StartBroadcast(getCarsSlice)
+
+	http.HandleFunc("/ws", wsManager.HandleWS)
+	http.Handle("/", http.FileServer(http.Dir("./static")))
+
+	log.Println("Starting web server on :8080")
+	if err := http.ListenAndServe(":8080", nil); err != nil {
+		log.Fatalf("Web server error: %v", err)
 	}
-
 }
 
 /*
@@ -87,18 +95,23 @@ func process_Serial_Data(in <-chan string) {
 	}
 }
 
-func printCarsMap() {
+func Update_active_flags(cars_map map[int]*car.Car, timout_period time.Duration) {
+	for {
+		for _, car := range cars_map {
+			carMutex.Lock()
+			car.Update_active_flag(timout_period)
+			carMutex.Unlock()
+		}
+		time.Sleep(time.Millisecond * 500)
+	}
+}
+
+func getCarsSlice() []*car.Car {
 	carMutex.RLock()
 	defer carMutex.RUnlock()
-
-	log.Println("----- Current Car Data -----")
-	for carNum, c := range carsMap {
-		serialized, err := c.Serialize()
-		if err != nil {
-			log.Printf("Error serializing car %d: %v", carNum, err)
-			continue
-		}
-		log.Printf("Car %d: %s", carNum, serialized)
+	carsSlice := make([]*car.Car, 0, len(carsMap))
+	for _, c := range carsMap {
+		carsSlice = append(carsSlice, c)
 	}
-	log.Println("----------------------------")
+	return carsSlice
 }
