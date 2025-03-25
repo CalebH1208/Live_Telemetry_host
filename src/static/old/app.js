@@ -1,6 +1,6 @@
 // Create a WebSocket connection.
 // Use the correct protocol (ws:// for HTTP, wss:// for HTTPS).
-const socket = new WebSocket("ws://MRTelemetry.com:8080/ws");
+const socket = new WebSocket("ws:" + window.location.host + "/ws");
 
 socket.onopen = function(event) {
   console.log("WebSocket connection opened.");

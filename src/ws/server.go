@@ -3,11 +3,12 @@ package ws
 import (
 	"car"
 	"encoding/json"
-	"github.com/gorilla/websocket"
 	"log"
 	"net/http"
 	"sync"
 	"time"
+
+	"github.com/gorilla/websocket"
 )
 
 type Manager struct {
@@ -58,11 +59,14 @@ func (m *Manager) BroadcastTelemetry(cars []*car.Car) {
 
 	m.clientsMu.Lock()
 	defer m.clientsMu.Unlock()
+	//log.Print("length", len(m.clients), " | ", len(data))
 	for conn := range m.clients {
 		if err := conn.WriteMessage(websocket.TextMessage, data); err != nil {
 			log.Println("Error writing to client:", err)
 			conn.Close()
 			delete(m.clients, conn)
+		} else {
+			//log.Print("sending data")
 		}
 	}
 }

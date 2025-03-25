@@ -37,7 +37,7 @@ func main() {
 	go wsManager.StartBroadcast(getCarsSlice)
 
 	http.HandleFunc("/ws", wsManager.HandleWS)
-	http.Handle("/", http.FileServer(http.Dir("./static")))
+	http.Handle("/", http.FileServer(http.Dir("./static/telemetry-ui/dist")))
 
 	log.Println("Starting web server on :8080")
 	if err := http.ListenAndServe(":8080", nil); err != nil {
