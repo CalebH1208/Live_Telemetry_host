@@ -1,18 +1,29 @@
 <template>
-  <div>
-    <h1>Hello World from Vue!</h1>
-    <p>This is your basic Vue component.</p>
+  <div id="app">
+    <TelemetryDashboard />
   </div>
 </template>
 
 <script>
-export default {
-  name: 'App'
-}
-</script>
+import TelemetryDashboard from "./components/TelemetryDashboard.vue";
+import websocket from "./services/websocket";
 
-<style scoped>
-h1 {
-  color:#f1b82d;
-}
-</style>
+export default {
+  name: "App",
+  components: {
+    TelemetryDashboard
+  },
+  created() {
+    // Use a relative URL to use the same host and port as the served page.
+    const wsUrl = "ws://" + window.location.host + "/ws";
+    const vm = this;
+    websocket.connect(wsUrl, (data) => {
+      // Dispatch the telemetry data to Vuex
+      vm.$store.dispatch("telemetry/updateTelemetry", data);
+    });
+  },
+  beforeDestroy() {
+    websocket.close();
+  }
+};
+</script>

@@ -28,9 +28,9 @@ type Car struct {
 	Telem_values []Telem_value `json:"TV"`
 }
 
-func (c *Car) update_Car_Num(newNum int) {
-	c.Car_num = newNum
-}
+// func (c *Car) update_Car_Num(newNum int) {
+// 	c.Car_num = newNum
+// }
 
 func (c *Car) update_last_active() {
 	c.last_active = time.Now()
@@ -46,9 +46,9 @@ func (c *Car) Update_active_flag(timeout time.Duration) {
 	}
 }
 
-func (c *Car) add_Telem_Value(tv Telem_value) {
-	c.Telem_values = append(c.Telem_values, tv)
-}
+// func (c *Car) add_Telem_Value(tv Telem_value) {
+// 	c.Telem_values = append(c.Telem_values, tv)
+// }
 
 func (c *Car) Serialize() (string, error) {
 	data, err := json.Marshal(c)
