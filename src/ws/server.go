@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"serial"
 	"sync"
 	"time"
 
@@ -14,6 +15,7 @@ import (
 type Manager struct {
 	clients   map[*websocket.Conn]bool
 	clientsMu sync.Mutex
+	writeMu   sync.Mutex
 	upgrader  websocket.Upgrader
 }
 
@@ -38,20 +40,41 @@ func (m *Manager) HandleWS(w http.ResponseWriter, r *http.Request) {
 	m.clientsMu.Unlock()
 	log.Println("new websocket client connected")
 
-	for {
-		if _, _, err := conn.NextReader(); err != nil {
+	go func() {
+		defer func() {
 			conn.Close()
 			m.clientsMu.Lock()
 			delete(m.clients, conn)
 			m.clientsMu.Unlock()
 			log.Println("WebSocket client disconnected")
-			break
+		}()
+
+		for {
+			_, message, err := conn.ReadMessage()
+			if err != nil {
+				log.Println("Error reading WebSocket message:", err)
+				return
+			}
+
+			// Process the message
+			var msgData map[string]interface{}
+			if err := json.Unmarshal(message, &msgData); err != nil {
+				log.Println("Error parsing WebSocket message:", err)
+				continue
+			}
+
+			// Process the parsed message
+			m.handleWSMessage(conn, msgData)
 		}
-	}
+	}()
 }
 
 func (m *Manager) BroadcastTelemetry(cars []*car.Car) {
-	data, err := json.Marshal(cars)
+	message := map[string]any{
+		"type": "telemetry",
+		"cars": cars,
+	}
+	data, err := json.Marshal(message)
 	if err != nil {
 		log.Println("error serializing data:", err)
 		return
@@ -61,6 +84,7 @@ func (m *Manager) BroadcastTelemetry(cars []*car.Car) {
 	defer m.clientsMu.Unlock()
 	//log.Print("length", len(m.clients), " | ", len(data))
 	for conn := range m.clients {
+		m.writeMu.Lock()
 		if err := conn.WriteMessage(websocket.TextMessage, data); err != nil {
 			log.Println("Error writing to client:", err)
 			conn.Close()
@@ -68,6 +92,7 @@ func (m *Manager) BroadcastTelemetry(cars []*car.Car) {
 		} else {
 			//log.Print("sending data")
 		}
+		m.writeMu.Unlock()
 	}
 }
 
@@ -78,4 +103,55 @@ func (m *Manager) StartBroadcast(getCars func() []*car.Car) {
 		cars := getCars()
 		m.BroadcastTelemetry(cars)
 	}
+}
+
+func (m *Manager) Send_available_ports() {
+	for {
+		ports, err := serial.Get_port_list()
+		if err != nil {
+			log.Fatal("serialport failed", err)
+			return
+		}
+
+		message := map[string]any{
+			"type":  "port_list",
+			"ports": ports,
+		}
+
+		data, _ := json.Marshal(message)
+
+		for conn := range m.clients {
+			m.writeMu.Lock()
+			if err := conn.WriteMessage(websocket.TextMessage, data); err != nil {
+				log.Println("Error writing to client:", err)
+				conn.Close()
+				delete(m.clients, conn)
+			} else {
+				//log.Print("sending data")
+			}
+			m.writeMu.Unlock()
+		}
+		time.Sleep(time.Millisecond * 500)
+	}
+}
+
+func (m *Manager) handleWSMessage(conn *websocket.Conn, message map[string]interface{}) {
+	msgType, ok := message["type"].(string)
+	if !ok {
+		return
+	}
+
+	switch msgType {
+	case "select_port":
+		portName, _ := message["port"].(string)
+		if portName != "" && portName != "no active ports" {
+			log.Print("connected to : ", portName)
+			go serial.Read_serial_message(portName)
+		}
+
+	default:
+		log.Print("handle WS message fail")
+
+	}
+
 }

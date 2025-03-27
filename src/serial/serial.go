@@ -8,40 +8,38 @@ import (
 	"go.bug.st/serial/enumerator"
 )
 
-func Get_port_list() (string, error) {
+var (
+	channel chan string
+)
+
+func Get_port_list() ([]string, error) {
 	log.SetPrefix("Serial: ")
 	ports, err := enumerator.GetDetailedPortsList()
 	if err != nil {
 		log.Fatal(err)
-		return "", err
+		return nil, err
 	}
 	if len(ports) == 0 {
-		return "No active Ports", nil
+		return []string{"no active ports"}, nil
 	}
-	ret := ""
+	var ret []string
 	for _, port := range ports {
-		ret += port.Name
-		ret += "\n"
+		ret = append(ret, port.Name)
 	}
 	return ret, nil
 }
 
-func Open_serial(port_name string) (serial.Port, error) {
+func Read_serial_message(port_name string) {
 	log.SetPrefix("Serial: ")
 	mode := &serial.Mode{
 		BaudRate: 115200,
 	}
-
 	port, err := serial.Open(port_name, mode)
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
+		return
 	}
-	return port, err
 
-}
-
-func Read_serial_message(port serial.Port, out chan<- string) {
-	log.SetPrefix("Serial: ")
 	var buffer string
 	buf := make([]byte, 1024)
 
@@ -49,7 +47,7 @@ func Read_serial_message(port serial.Port, out chan<- string) {
 		n, err := port.Read(buf)
 		if err != nil {
 			log.Print(err)
-			continue
+			break
 		}
 		if n > 0 {
 			buffer += string(buf[:n])
@@ -67,10 +65,14 @@ func Read_serial_message(port serial.Port, out chan<- string) {
 				endIdx = startIdx + endIdx
 
 				fullMessage := buffer[startIdx : endIdx+1]
-				out <- fullMessage
+				channel <- fullMessage
 
 				buffer = buffer[endIdx+1:]
 			}
 		}
 	}
+}
+
+func Set_up_serial_channel(mainChan chan string) {
+	channel = mainChan
 }

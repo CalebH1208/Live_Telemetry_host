@@ -19,10 +19,22 @@ export default {
     const vm = this;
     websocket.connect(wsUrl, (data) => {
       // Dispatch the telemetry data to Vuex
-      vm.$store.dispatch("telemetry/updateTelemetry", data);
+
+      if (data && data.type) {
+        if(data.type === "telemetry"){
+          vm.$store.dispatch("telemetry/updateTelemetry", data.cars);
+        }
+        else if(data.type === "port_list") {
+          vm.$store.dispatch("telemetry/updatePorts", data.ports);
+        }
+        else {
+        console.warn("Received unknown message from WebSocket:", data);
+      }
+      }
+      
     });
   },
-  beforeDestroy() {
+  beforeUnmount() {
     websocket.close();
   }
 };

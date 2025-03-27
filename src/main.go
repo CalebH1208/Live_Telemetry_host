@@ -3,7 +3,6 @@ package main
 import (
 	"car"
 	"log"
-	"net"
 	"net/http"
 	"serial"
 	"strconv"
@@ -14,27 +13,22 @@ import (
 )
 
 var (
-	carsMap  = make(map[int]*car.Car)
-	carMutex sync.RWMutex
+	carsMap    = make(map[int]*car.Car)
+	carMutex   sync.RWMutex
+	serialChan = make(chan string, 100)
 )
 
 func main() {
 	log.SetPrefix("Main: ")
-	serialChan := make(chan string, 100)
-	portName := "COM8"
 
-	port, err := serial.Open_serial(portName)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer port.Close()
+	serial.Set_up_serial_channel(serialChan)
 
-	go serial.Read_serial_message(port, serialChan)
 	go process_Serial_Data(serialChan)
 	go Update_active_flags(carsMap, time.Second*5)
 
 	wsManager := ws.NewManager()
 	go wsManager.StartBroadcast(getCarsSlice)
+	go wsManager.Send_available_ports()
 
 	http.HandleFunc("/ws", wsManager.HandleWS)
 	http.Handle("/", http.FileServer(http.Dir("./static/telemetry-ui/dist")))
@@ -43,7 +37,6 @@ func main() {
 	if err := http.ListenAndServe(":8080", nil); err != nil {
 		log.Fatalf("Web server error: %v", err)
 	}
-	printServerAddresses(8080)
 }
 
 /*
@@ -116,22 +109,4 @@ func getCarsSlice() []*car.Car {
 		carsSlice = append(carsSlice, c)
 	}
 	return carsSlice
-}
-
-func printServerAddresses(port int) {
-	addrs, err := net.InterfaceAddrs()
-	if err != nil {
-		log.Printf("Error getting IP addresses: %v", err)
-		return
-	}
-	log.Println("Server may be reachable at:")
-	for _, addr := range addrs {
-		// Check if the address is an IP address and not a loopback.
-		if ipnet, ok := addr.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
-			// Only consider IPv4 addresses.
-			if ip4 := ipnet.IP.To4(); ip4 != nil {
-				log.Printf("http://%s:%d/", ip4.String(), port)
-			}
-		}
-	}
 }
