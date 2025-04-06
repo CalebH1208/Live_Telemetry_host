@@ -79,6 +79,9 @@ func (m *Manager) BroadcastTelemetry(cars []*car.Car) {
 		log.Println("error serializing data:", err)
 		return
 	}
+	if len(cars) == 0 {
+		return
+	}
 
 	m.clientsMu.Lock()
 	defer m.clientsMu.Unlock()
@@ -148,7 +151,8 @@ func (m *Manager) handleWSMessage(conn *websocket.Conn, message map[string]inter
 			log.Print("connected to : ", portName)
 			go serial.Read_serial_message(portName)
 		}
-
+	case "reset":
+		serial.Restart_serial()
 	default:
 		log.Print("handle WS message fail")
 

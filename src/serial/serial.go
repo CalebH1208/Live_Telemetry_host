@@ -3,6 +3,7 @@ package serial
 import (
 	"log"
 	"strings"
+	"time"
 
 	"go.bug.st/serial"
 	"go.bug.st/serial/enumerator"
@@ -10,6 +11,7 @@ import (
 
 var (
 	channel chan string
+	restart bool
 )
 
 func Get_port_list() ([]string, error) {
@@ -49,6 +51,11 @@ func Read_serial_message(port_name string) {
 			log.Print(err)
 			break
 		}
+		if restart {
+			log.Print("Restarting serial ports")
+			channel <- "kill"
+			break
+		}
 		if n > 0 {
 			buffer += string(buf[:n])
 
@@ -71,8 +78,16 @@ func Read_serial_message(port_name string) {
 			}
 		}
 	}
+	log.Print("closing port: ", port_name)
+	port.Close()
 }
 
 func Set_up_serial_channel(mainChan chan string) {
 	channel = mainChan
+}
+
+func Restart_serial() {
+	restart = true
+	time.Sleep(time.Second)
+	restart = false
 }

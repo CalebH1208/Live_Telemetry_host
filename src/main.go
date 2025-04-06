@@ -4,6 +4,8 @@ import (
 	"car"
 	"log"
 	"net/http"
+	"os"
+	"path/filepath"
 	"serial"
 	"strconv"
 	"strings"
@@ -31,7 +33,23 @@ func main() {
 	go wsManager.Send_available_ports()
 
 	http.HandleFunc("/ws", wsManager.HandleWS)
-	http.Handle("/", http.FileServer(http.Dir("./static/telemetry-ui/dist")))
+
+	static_dir := "./static/telemetry-ui/dist"
+	//http.Handle("/", http.FileServer(http.Dir(static_dir)))
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		// Get the absolute path of the requested file
+		path := filepath.Join(static_dir, r.URL.Path)
+		// Check if file exists and is not a directory
+		info, err := os.Stat(path)
+		if os.IsNotExist(err) || info.IsDir() {
+			// If the file doesn't exist or it's a directory,
+			// serve the index.html so the SPA can handle the route.
+			http.ServeFile(w, r, static_dir)
+			return
+		}
+		// Otherwise, serve the file.
+		http.ServeFile(w, r, path)
+	})
 
 	log.Println("Starting web server on :8080")
 	if err := http.ListenAndServe(":8080", nil); err != nil {
@@ -51,6 +69,9 @@ if not in this format it will break don't @ me
 */
 func process_Serial_Data(in <-chan string) {
 	for msg := range in {
+		if msg == "kill" {
+			carsMap = make(map[int]*car.Car)
+		}
 		lines := strings.Split(msg, "\n")
 		if len(lines) < 3 {
 			log.Printf("Received message too short, ignoring: %s", msg)
@@ -109,4 +130,8 @@ func getCarsSlice() []*car.Car {
 		carsSlice = append(carsSlice, c)
 	}
 	return carsSlice
+}
+
+func Empty_car_list() {
+
 }

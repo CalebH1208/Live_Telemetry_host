@@ -9,9 +9,10 @@ const WebSocketService = {
   
     this.socket.onmessage = (event) => {
       try {
+        if (!event.data || !event.data.trim()) return;
         // Try to parse the received data as JSON.
         let data = JSON.parse(event.data);
-        console.log("WebSocket received:", data);
+        //console.log("WebSocket received:", data);
         if (onMessageCallback && typeof onMessageCallback === "function") {
           onMessageCallback(data);
         }

@@ -1,9 +1,9 @@
-import { createApp } from 'vue';
-import App from './App.vue';
-import store from './store';
-import websocket from "./services/websocket";
+import { createApp } from "vue";
+import App from "./App.vue";
+import store from "./store";
+import router from "./router"
 
 const app = createApp(App);
-app.config.globalProperties.$socket = websocket;
 app.use(store);
-app.mount('#app');
+app.use(router);
+app.mount("#app");
