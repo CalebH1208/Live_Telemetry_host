@@ -56,7 +56,7 @@
         this.$router.push({ name: "HostSettings" });
       },
       onLapTimer() {
-        console.log("Lap Timer clicked");
+        this.$router.push({ name: "LapTimer" });
       },
       // Toggle the hidden status of a car:
       toggleCar(carNum) {

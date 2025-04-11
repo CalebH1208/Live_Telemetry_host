@@ -120,7 +120,7 @@ export default {
           return orderedTelemetry.slice(0, n);
         }
       }
-      console.log(stored);
+      //console.log(stored);
       return car.TV.slice(0, n);
     },
     formatValue(value, precision) {

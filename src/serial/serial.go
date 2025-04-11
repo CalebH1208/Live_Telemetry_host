@@ -60,7 +60,14 @@ func Read_serial_message(port_name string) {
 			buffer += string(buf[:n])
 
 			for {
-				startIdx := strings.Index(buffer, "CN:")
+				var startIdx int
+				startIdxcar := strings.Index(buffer, "CN:")
+				startIdxlap := strings.Index(buffer, "LT:")
+				if startIdxcar < startIdxlap {
+					startIdx = startIdxcar
+				} else {
+					startIdx = startIdxlap
+				}
 				if startIdx == -1 {
 					break
 				}

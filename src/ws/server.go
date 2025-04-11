@@ -3,6 +3,7 @@ package ws
 import (
 	"car"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"serial"
@@ -135,6 +136,50 @@ func (m *Manager) Send_available_ports() {
 			m.writeMu.Unlock()
 		}
 		time.Sleep(time.Millisecond * 500)
+	}
+}
+
+func (m *Manager) Send_lap_times(lapTimesaddr *[1024]time.Duration) {
+	for {
+		lapTimes := *lapTimesaddr
+		// Find highest index with data
+		highestUsed := -1
+		for i, lap := range lapTimes {
+			if lap != 0 {
+				highestUsed = i
+			}
+		}
+
+		laps := make([]string, highestUsed+1)
+		for i := 0; i <= highestUsed; i++ {
+			if lapTimes[i] == 0 {
+				laps[i] = "00:00.00"
+			} else {
+				minutes := int(lapTimes[i].Minutes())
+				seconds := int((lapTimes[i] % time.Minute).Seconds())
+				hundredths := int((lapTimes[i] % time.Second).Milliseconds() / 10)
+				laps[i] = fmt.Sprintf("%02d:%02d.%02d", minutes, seconds, hundredths)
+			}
+		}
+
+		message := map[string]any{
+			"type":      "lap_times",
+			"lap_times": laps,
+		}
+
+		data, _ := json.Marshal(message)
+
+		for conn := range m.clients {
+			m.writeMu.Lock()
+			if err := conn.WriteMessage(websocket.TextMessage, data); err != nil {
+				log.Println("Error writing to client:", err)
+				conn.Close()
+				delete(m.clients, conn)
+			}
+			m.writeMu.Unlock()
+		}
+
+		time.Sleep(2 * time.Second)
 	}
 }
 

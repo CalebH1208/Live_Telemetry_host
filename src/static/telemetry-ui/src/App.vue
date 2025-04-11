@@ -54,7 +54,7 @@ export default {
   created() {
     const wsUrl = "ws://" + window.location.host + "/ws";
     websocket.connect(wsUrl, (data) => {
-      //console.log("App.vue received:", data);
+      console.log("App.vue received:", data);
       if (data && data.type) {
         if (data.type === "telemetry") {
           if (data.cars && Array.isArray(data.cars)) {
@@ -71,9 +71,14 @@ export default {
           } else {
             console.warn("Port list message missing 'ports' array", data);
           }
+        } else if (data.type === "lap_times") {
+        if (data.lap_times && Array.isArray(data.lap_times)) {
+          this.$store.dispatch("lapTimer/updateLapTimes", data.lap_times);
+          }
         } else {
           console.warn("Unknown WebSocket message type:", data);
         }
+      
       } else if (Array.isArray(data)) {
         this.$store.dispatch("telemetry/updateTelemetry", data);
       }
