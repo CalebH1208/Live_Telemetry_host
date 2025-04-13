@@ -179,7 +179,7 @@ func (m *Manager) Send_lap_times(lapTimesaddr *[1024]time.Duration) {
 			m.writeMu.Unlock()
 		}
 
-		time.Sleep(2 * time.Second)
+		time.Sleep(400 * time.Millisecond)
 	}
 }
 

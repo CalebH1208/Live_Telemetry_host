@@ -35,8 +35,8 @@ func main() {
 	go wsManager.Send_available_ports()
 	go wsManager.Send_lap_times(&lapTimes)
 
-	testInput := "LT:=2,1:23.45\n|"
-	parse_and_store_lap_time(testInput)
+	// testInput := "LT:=2,1:23.45\n|"
+	// parse_and_store_lap_time(testInput)
 
 	http.HandleFunc("/ws", wsManager.HandleWS)
 
@@ -80,7 +80,7 @@ func process_Serial_Data(in <-chan string) {
 			continue
 		}
 		if msg[0:3] == "LT:" {
-			log.Print("lap time reported")
+			//log.Print("lap time reported")
 			parse_and_store_lap_time(msg)
 			continue
 		}
@@ -130,6 +130,7 @@ func parse_and_store_lap_time(input string) error {
 
 	// Parse the formatted string
 	_, err := fmt.Sscanf(input, "LT:=%d,%d:%d.%d", &index, &minutes, &seconds, &mill)
+	//print("Something got got")
 	if err != nil {
 		return fmt.Errorf("failed to parse lap time: %w", err)
 	}

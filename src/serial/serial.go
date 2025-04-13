@@ -60,27 +60,41 @@ func Read_serial_message(port_name string) {
 			buffer += string(buf[:n])
 
 			for {
-				var startIdx int
-				startIdxcar := strings.Index(buffer, "CN:")
-				startIdxlap := strings.Index(buffer, "LT:")
-				if startIdxcar < startIdxlap {
-					startIdx = startIdxcar
-				} else {
-					startIdx = startIdxlap
-				}
-				if startIdx == -1 {
+				idxCN := strings.Index(buffer, "CN:")
+				idxLT := strings.Index(buffer, "LT:")
+
+				// If neither message is present, break out of the loop.
+				if idxCN == -1 && idxLT == -1 {
 					break
 				}
 
+				// Determine the earliest valid start index.
+				var startIdx int
+				if idxCN == -1 {
+					startIdx = idxLT
+				} else if idxLT == -1 {
+					startIdx = idxCN
+				} else if idxCN < idxLT {
+					startIdx = idxCN
+				} else {
+					startIdx = idxLT
+				}
+
+				// Find the end marker for the message (the "|" character) after the startIdx.
 				endIdx := strings.Index(buffer[startIdx:], "|")
 				if endIdx == -1 {
+					// Incomplete message, wait for more data.
 					break
 				}
 				endIdx = startIdx + endIdx
 
+				// Extract the full message (including the "|" delimiter).
 				fullMessage := buffer[startIdx : endIdx+1]
+
+				// Send the message to the channel.
 				channel <- fullMessage
 
+				// Remove the processed message from the buffer.
 				buffer = buffer[endIdx+1:]
 			}
 		}
