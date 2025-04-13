@@ -15,7 +15,7 @@
         @end="onDragEnd">
         <template #item="{ element, index }">
           <div class="telemetry-item" :class="{ alt: index % 2 === 1 }">
-            <!-- Row Main is always visible; clicking toggles expansion -->
+            <!-- Row Main: always visible; clicking toggles expansion -->
             <div class="row-main" @click.stop="toggleExpanded(element)">
               <span class="name">{{ element.N }}</span>
               <span class="value">{{ formatValue(element.V, getPrecision(element)) }}</span>
@@ -83,17 +83,18 @@ export default {
           }
         }
       },
-      immediate: true
+      immediate: true,
+      deep: true
     },
-    // Watch telemetryData (deeply) and update localTelemetry if there are new values.
-    telemetryData: {
-      handler(newData) {
-        if (this.currentCar && this.currentCar.TV) {
+    // Watch changes within the telemetry array (TV) of the current car.
+    "currentCar.TV": {
+      handler(newTV) {
+        if (this.currentCar && newTV) {
           this.loadTelemetryWithSavedOrder(this.currentCar);
         }
       },
-      deep: true,
-      immediate: true
+      immediate: true,
+      deep: true
     }
   },
   methods: {
@@ -130,18 +131,16 @@ export default {
       this.dragging = false;
       this.saveTelemetryOrder();
     },
-    // Toggle expanded state for a telemetry item.
+    // Toggle expanded/collapsed state for a telemetry item.
     toggleExpanded(tv) {
-      if (this.dragging) return; // Prevent toggle during drag.
-      // Toggle the expanded state keyed by the telemetry name.
+      if (this.dragging) return;
       this.expanded[tv.N] = !this.expanded[tv.N];
-      // Force reactivity update.
       this.expanded = { ...this.expanded };
     },
     isExpanded(tv) {
       return this.expanded[tv.N] === true;
     },
-    // Filter button as toggle (instead of checkbox).
+    // Filter button as toggle.
     filterCookieKey(tv) {
       return `${this.currentCar.CN}_${tv.N}_F`;
     },
@@ -195,6 +194,7 @@ export default {
   display: flex;
   flex-direction: column;
   height: 100vh;
+  padding-top: 100px;
   background-color: var(--color-background);
   color: var(--color-text);
   font-size: 1.5em;
@@ -207,7 +207,7 @@ export default {
   left: 0;
   width: 100%;
   background-color: var(--color-primary);
-  color: var(--color-background);
+  color: var(--color-text);
   padding: 20px;
   display: flex;
   align-items: center;
@@ -216,16 +216,16 @@ export default {
 }
 .back-button {
   position: absolute;
-  left: 20px;
+  left: 0px;
   background: none;
   border: none;
-  font-size: 2em;
-  color: var(--color-background);
+  font-size: 8vw;
+  color: var(--color-text);
   cursor: pointer;
 }
 .title {
   margin: 0;
-  font-size: 2em;
+  font-size: 8vw;
 }
 
 /* Draggable Telemetry List */
@@ -234,13 +234,34 @@ export default {
   flex: 1;
   overflow-y: auto;
   padding: 20px;
+  /* Custom scrollbar styling */
+  scrollbar-width: thin;
+  scrollbar-color: #888 #f1f1f1;
 }
+
+/* For WebKit Browsers */
+.telemetry-list::-webkit-scrollbar {
+  width: 8px;
+}
+.telemetry-list::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+.telemetry-list::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 10px;
+}
+.telemetry-list::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
 .telemetry-item {
   background-color: var(--color-secondary);
-  color: var(--color-background);
+  color: var(--color-text);
   padding: 20px;
   margin-bottom: 20px;
   border-radius: 8px;
+  font-size: 4vw;
   transition: background-color 0.3s, max-height 0.3s, opacity 0.3s;
   overflow: hidden;
 }

@@ -52,7 +52,7 @@
     left: 0;
     width: 100%;
     background-color: var(--color-primary);
-    color: var(--color-background);
+    color: var(--color-text);
     padding: 20px;
     display: flex;
     align-items: center;
@@ -65,7 +65,7 @@
     background: none;
     border: none;
     font-size: 2em;
-    color: var(--color-background);
+    color: var(--color-text);
     cursor: pointer;
   }
   .title {
@@ -86,7 +86,7 @@
     padding: 15px;
     margin-bottom: 10px;
     background-color: var(--color-secondary);
-    color: var(--color-background);
+    color: var(--color-text);
     border-radius: 5px;
   }
   .lap-number {

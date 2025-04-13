@@ -14,7 +14,7 @@
           <!-- Tapping a placard navigates to Car Details -->
           <div class="car-placard" :class="{ alt: index % 2 === 1 }" @click="goToCarDetails(element)">
             <h2>Car {{ element.CN }}</h2>
-            <div v-for="(tv, idx) in firstN(element, 3)" :key="tv.N" class="telemetry-block">
+            <div v-for="(tv, idx) in firstN(element, 5)" :key="tv.N" class="telemetry-block">
               <div class="telemetry-row">
                 <span class="telemetry-name">{{ tv.N }}</span>
                 <span class="telemetry-value">{{ formatValue(tv.V, getPrecision(element, tv)) }}</span>
@@ -166,22 +166,23 @@ export default {
   align-items: center;
   justify-content: center;
   background-color: var(--color-primary);
-  color: var(--color-background);
+  color: var(--color-text);
   padding: 20px;
+  margin-bottom: 10px;
   z-index: 10;
 }
 .hamburger {
   position: absolute;
-  left: 20px;
+  left: 0px;
   background: none;
   border: none;
-  font-size: 2em;
-  color: var(--color-background);
+  font-size: 8vw;
+  color: var(--color-text);
   cursor: pointer;
 }
 .title {
   margin: 0;
-  font-size: 2em;
+  font-size: 8vw;
 }
 .cars-list {
   margin-top: 80px;
@@ -191,10 +192,11 @@ export default {
 }
 .car-placard {
   background-color: var(--color-secondary);
-  color: var(--color-background);
+  color: var(--color-text);
   padding: 20px;
-  margin-bottom: 20px;
+  margin-top: 35px;
   border-radius: 8px;
+  font-size: 4vw;
   transition: background-color 0.3s;
   cursor: pointer;
 }
@@ -215,7 +217,7 @@ export default {
   left: 0;
   width: 100%;
   background-color: var(--color-secondary);
-  color: var(--color-background);
+  color: var(--color-text);
   padding: 20px;
   display: flex;
   align-items: center;
@@ -225,5 +227,6 @@ export default {
 .lap-time-placeholder {
   flex: 1;
   text-align: right;
+  margin-right: 25px;
 }
 </style>

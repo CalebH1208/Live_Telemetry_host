@@ -67,26 +67,27 @@ export default {
   top: 0;
   left: 0;
   width: 100%;
-  background-color: var(--color-primary);
-  color: var(--color-background);
-  padding: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
+  background-color: var(--color-primary);
+  color: var(--color-text);
+  padding: 20px;
+  margin-bottom: 10px;
   z-index: 10;
 }
 .back-button {
   position: absolute;
-  left: 20px;
+  left: 0px;
   background: none;
   border: none;
-  font-size: 2em;
-  color: var(--color-background);
+  font-size: 8vw;
+  color: var(--color-text);
   cursor: pointer;
 }
 .title {
   margin: 0;
-  font-size: 2em;
+  font-size: 8vw;
 }
 .content {
   margin-top: 80px;
@@ -102,20 +103,18 @@ export default {
 }
 #port-dropdown {
   margin: 10px 0;
-  font-size: 1.5em;
-  padding: 5px;
+  font-size: 5vw;
+  padding: 10px;
 }
 .connect-button,
 .reset-button {
-  font-size: 1.5em;
+  font-size: 5vw;
   padding: 10px 20px;
-  background-color: var(--color-primary);
+  background-color: var(--color-secondary);
   color: var(--color-text);
   border: none;
   border-radius: 5px;
   margin: 10px 0;
-}
-.reset-button {
   margin-top: 50px;
 }
 </style>

@@ -105,7 +105,7 @@
     padding: 15px;
     margin-bottom: 15px;
     background-color: var(--color-primary);
-    color: var(--color-background);
+    color: var(--color-text);
     border: none;
     font-size: 1.5em;
     border-radius: 5px;

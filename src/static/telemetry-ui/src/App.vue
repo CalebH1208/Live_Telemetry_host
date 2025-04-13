@@ -92,11 +92,11 @@ export default {
 
 <style>
 :root {
-  --color-primary: #fceb09;
-  --color-secondary: #424242;
-  --color-accent: #82B1FF;
-  --color-background: #FFFFFF;
-  --color-text: #550101;
+  --color-primary: #f1b82d;
+  --color-secondary: #000000;
+  --color-accent: #f1b82d;
+  --color-background: #6c6c6c;
+  --color-text: #ffffff;
   --color-overlay: rgba(0, 0, 0, 0.5);
 }
 body {
