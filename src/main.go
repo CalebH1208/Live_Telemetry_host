@@ -35,8 +35,8 @@ func main() {
 	go wsManager.Send_available_ports()
 	go wsManager.Send_lap_times(&lapTimes)
 
-	// testInput := "LT:=2,1:23.45\n|"
-	// parse_and_store_lap_time(testInput)
+	//testInput := "LT:=2,1:23.45\n|"
+	//parse_and_store_lap_time(testInput)
 
 	http.HandleFunc("/ws", wsManager.HandleWS)
 

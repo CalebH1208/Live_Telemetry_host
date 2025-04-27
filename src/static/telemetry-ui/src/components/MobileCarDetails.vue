@@ -15,7 +15,7 @@
         @end="onDragEnd">
         <template #item="{ element, index }">
           <div class="telemetry-item" :class="{ alt: index % 2 === 1 }">
-            <!-- Row Main: always visible; clicking toggles expansion -->
+            <!-- Row Main is always visible; clicking toggles expansion -->
             <div class="row-main" @click.stop="toggleExpanded(element)">
               <span class="name">{{ element.N }}</span>
               <span class="value">{{ formatValue(element.V, getPrecision(element)) }}</span>
@@ -86,7 +86,7 @@ export default {
       immediate: true,
       deep: true
     },
-    // Watch changes within the telemetry array (TV) of the current car.
+    // Watch for changes in the current car's telemetry data.
     "currentCar.TV": {
       handler(newTV) {
         if (this.currentCar && newTV) {
@@ -194,7 +194,7 @@ export default {
   display: flex;
   flex-direction: column;
   height: 100vh;
-  padding-top: 100px;
+  margin-top: 80px;
   background-color: var(--color-background);
   color: var(--color-text);
   font-size: 1.5em;
@@ -220,7 +220,7 @@ export default {
   background: none;
   border: none;
   font-size: 8vw;
-  color: var(--color-text);
+  color: var(--color-background);
   cursor: pointer;
 }
 .title {
@@ -234,27 +234,23 @@ export default {
   flex: 1;
   overflow-y: auto;
   padding: 20px;
-  /* Custom scrollbar styling */
-  scrollbar-width: thin;
-  scrollbar-color: #888 #f1f1f1;
+  /* Custom scrollbar styling inside the content area */
+  scrollbar-width: auto;
+  scrollbar-color: var(--color-primary) var(--color-secondary);
 }
-
-/* For WebKit Browsers */
 .telemetry-list::-webkit-scrollbar {
-  width: 8px;
+  width: 12px;
 }
 .telemetry-list::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: var(--color-secondary);
   border-radius: 10px;
+  box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
 }
 .telemetry-list::-webkit-scrollbar-thumb {
-  background: #888;
+  background-color: var(--color-primary);
   border-radius: 10px;
+  border: 2px solid var(--color-secondary);
 }
-.telemetry-list::-webkit-scrollbar-thumb:hover {
-  background: #555;
-}
-
 .telemetry-item {
   background-color: var(--color-secondary);
   color: var(--color-text);

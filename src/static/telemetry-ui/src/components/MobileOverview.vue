@@ -14,7 +14,7 @@
           <!-- Tapping a placard navigates to Car Details -->
           <div class="car-placard" :class="{ alt: index % 2 === 1 }" @click="goToCarDetails(element)">
             <h2>Car {{ element.CN }}</h2>
-            <div v-for="(tv, idx) in firstN(element, 5)" :key="tv.N" class="telemetry-block">
+            <div v-for="(tv, idx) in firstN(element, 15)" :key="tv.N" class="telemetry-block">
               <div class="telemetry-row">
                 <span class="telemetry-name">{{ tv.N }}</span>
                 <span class="telemetry-value">{{ formatValue(tv.V, getPrecision(element, tv)) }}</span>
@@ -29,7 +29,7 @@
     <!-- Fixed Footer -->
     <div class="footer">
       <span>Last lap time:</span>
-      <div class="lap-time-placeholder">--:--</div>
+      <div class="lap-time-placeholder">{{ lastLap }}</div>
     </div>
   </div>
 </template>
@@ -58,7 +58,15 @@ export default {
     };
   },
   computed: {
-    ...mapGetters("telemetry", ["telemetryData"])
+    ...mapGetters("telemetry", ["telemetryData"]),
+    // Get lap times from the lapTimer module.
+    ...mapGetters("lapTimer", ["lapTimes"]),
+    // Calculate the last lap time (if any); fallback to "--:--"
+    lastLap() {
+      return this.lapTimes && this.lapTimes.length
+        ? this.lapTimes[this.lapTimes.length - 1]
+        : "--:--";
+    }
   },
   watch: {
     telemetryData: {
@@ -120,7 +128,6 @@ export default {
           return orderedTelemetry.slice(0, n);
         }
       }
-      //console.log(stored);
       return car.TV.slice(0, n);
     },
     formatValue(value, precision) {
@@ -227,6 +234,7 @@ export default {
 .lap-time-placeholder {
   flex: 1;
   text-align: right;
+  padding-right: 50px;
   margin-right: 25px;
 }
 </style>
