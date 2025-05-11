@@ -14,7 +14,7 @@
           <!-- Tapping a placard navigates to Car Details -->
           <div class="car-placard" :class="{ alt: index % 2 === 1 }" @click="goToCarDetails(element)">
             <h2>Car {{ element.CN }}</h2>
-            <div v-for="(tv, idx) in firstN(element, 15)" :key="tv.N" class="telemetry-block">
+            <div v-for="(tv, idx) in firstN(element,20)" :key="tv.N" class="telemetry-block">
               <div class="telemetry-row">
                 <span class="telemetry-name">{{ tv.N }}</span>
                 <span class="telemetry-value">{{ formatValue(tv.V, getPrecision(element, tv)) }}</span>
